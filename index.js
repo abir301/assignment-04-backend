@@ -25,39 +25,52 @@ async function run() {
 
     const database = client.db("libraryDB")
     const addBook = database.collection("addBook")
+    const borrowBook = database.collection("borrowBook")
 
 
     app.post('/all-books', async (req, res) => {
       const newBook = req.body;
-      console.log(newBook);
       const result = await addBook.insertOne(newBook);
       res.send(result);
     })
 
     app.get('/all-books', async (req, res) => {
-      const cursor = addBook.find();
-      const result = await cursor.toArray(); 
+      const allBooks = addBook.find();
+      const result = await allBooks.toArray();
       res.send(result);
     })
 
-      app.get('/all-books/:id', async (req, res) => {
+    app.get('/all-books/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await addBook.findOne(query);
       res.send(result)
     })
 
-    app.patch('/all-books/:id' , async(req , res)=>{
+    app.patch('/all-books/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id: new ObjectId(id)}
-      const options = {upsert: false};
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: false };
       const updatedBook = req.body
       const updateDoc = {
-        $set: {title: updatedBook.title , author: updatedBook.author , genre: updatedBook.genre , isbn: updatedBook.isbn , copies: updatedBook.copies , description: updatedBook.description , bookCover: updatedBook.bookCover , availability: updatedBook.availability }
+        $set: { title: updatedBook.title, author: updatedBook.author, genre: updatedBook.genre, isbn: updatedBook.isbn, copies: updatedBook.copies, description: updatedBook.description, bookCover: updatedBook.bookCover}
       };
-      const result = await addBook.updateOne(filter , updateDoc  , options)
+      const result = await addBook.updateOne(filter, updateDoc, options)
       res.send(result);
     })
+
+    app.post('/borrows', async (req, res) => {
+      const borrowedBook = req.body;
+      const result = await borrowBook.insertOne(borrowedBook);
+      res.send(result);
+    })
+
+    app.get('/borrows', async (req, res) => {
+      const borrowed = borrowBook.find();
+      const result = await borrowed.toArray();
+      res.send(result);
+    })
+
 
     // Connect the client to the server	(optional starting in v4.7)
     //await client.connect();
@@ -73,7 +86,7 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', (req, res) => { 
+app.get('/', (req, res) => {
   res.send('Server is running')
 })
 
