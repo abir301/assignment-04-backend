@@ -29,46 +29,99 @@ async function run() {
 
 
     app.post('/all-books', async (req, res) => {
-      const newBook = req.body;
-      const result = await addBook.insertOne(newBook);
-      res.send(result);
+      try {
+        const newBook = req.body;
+        const result = await addBook.insertOne(newBook);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
     app.get('/all-books', async (req, res) => {
-      const allBooks = addBook.find();
-      const result = await allBooks.toArray();
-      res.send(result);
+      try {
+        const allBooks = addBook.find();
+        const result = await allBooks.toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
     app.get('/all-books/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await addBook.findOne(query);
-      res.send(result)
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await addBook.findOne(query);
+        res.send(result)
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    })
+
+    app.put('/all-books/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) }
+        const options = { upsert: false };
+        const updatedBook = req.body
+        const updateDoc = {
+          $set: { title: updatedBook.title, author: updatedBook.author, genre: updatedBook.genre, isbn: updatedBook.isbn, copies: updatedBook.copies, description: updatedBook.description, bookCover: updatedBook.bookCover }
+        };
+        const result = await addBook.updateOne(filter, updateDoc, options)
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
     app.patch('/all-books/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) }
-      const options = { upsert: false };
-      const updatedBook = req.body
-      const updateDoc = {
-        $set: { title: updatedBook.title, author: updatedBook.author, genre: updatedBook.genre, isbn: updatedBook.isbn, copies: updatedBook.copies, description: updatedBook.description, bookCover: updatedBook.bookCover}
-      };
-      const result = await addBook.updateOne(filter, updateDoc, options)
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const options = { upsert: false };
+        const updatedBook = req.body;
+
+        const updateDoc = {
+          $inc: { copies: -Number(updatedBook.copies) }
+        };
+
+        const result = await addBook.updateOne(filter, updateDoc, options);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    });
+
+    app.delete('/all-books/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await addBook.deleteOne(query);
+        res.send(result)
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
     app.post('/borrows', async (req, res) => {
-      const borrowedBook = req.body;
-      const result = await borrowBook.insertOne(borrowedBook);
-      res.send(result);
+      try {
+        const borrowedBook = req.body;
+        const result = await borrowBook.insertOne(borrowedBook);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
     app.get('/borrows', async (req, res) => {
-      const borrowed = borrowBook.find();
-      const result = await borrowed.toArray();
-      res.send(result);
+      try {
+        const borrowed = borrowBook.find();
+        const result = await borrowed.toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
     })
 
 
@@ -93,4 +146,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`server is running on port ${port}`)
 })
-
